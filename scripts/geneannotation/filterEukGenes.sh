@@ -56,7 +56,14 @@ unset __conda_setup
 baseDir="`dirname \"$0\"`"
 
 #process the inputs and format them for EVM and make the weights.txt file
-mv ${genome} genome.fasta
+#checking if the fasta is a .gz
+faEnd="${genome: -3}"
+if [[ "${faEnd}" == ".gz" ]]; then
+    cp $genome genome.fasta.gz
+    gunzip genome.fasta.gz
+else
+    cp $genome genome.fasta
+fi
 touch weights.txt
 touch gene_predictions.gff3
 touch protein_alignments.gff3
@@ -213,7 +220,10 @@ if [ -f "Helixer_augustus.gtf" ]; then
     echo -e "mkdir helixAug" >> helixAugCommands.txt
     echo -e "cp Helixer_augustus.gtf helixAug/" >> helixAugCommands.txt
     echo -e "cd helixAug/" >> helixAugCommands.txt
-    echo -e "perl /opt/EVidenceModeler/EvmUtils/misc/augustus_GTF_to_EVM_GFF3.pl Helixer_augustus.gtf > Helixer_augustus.gff3" >> helixAugCommands.txt
+    echo -e "perl /opt/EVidenceModeler/EvmUtils/misc/augustus_GTF_to_EVM_GFF3.pl Helixer_augustus.gtf > Helixer_augustus_perl.gff3" >> helixAugCommands.txt
+    echo -e "gt  gff3  -force  -tidy  -sort  -retainids  -checkids  -o tmp_perl.gff3  Helixer_augustus_perl.gff3" >> helixAugCommands.txt
+    echo -e "mv tmp.gff3 Helixer_augustus_perl.gff3" >> helixAugCommands.txt
+    echo -e "agat_convert_sp_gxf2gxf.pl -g Helixer_augustus.gtf -o Helixer_augustus.gff3" >> helixAugCommands.txt
     echo -e "gt  gff3  -force  -tidy  -sort  -retainids  -checkids  -o tmp.gff3  Helixer_augustus.gff3" >> helixAugCommands.txt
     echo -e "mv tmp.gff3 Helixer_augustus.gff3" >> helixAugCommands.txt
     echo -e "cp ../genome.fasta ." >> helixAugCommands.txt
@@ -228,12 +238,16 @@ if [ -f "Helixer_augustus.gtf" ]; then
     echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' complete_Helixaugustus.gff3" >> helixAugCommands.txt
     echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' removed_Helixaugustus.gff3" >> helixAugCommands.txt
     echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' Helixer_augustus.gff3" >> helixAugCommands.txt
+    # echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' complete_Helixaugustus_perl.gff3" >> helixAugCommands.txt
+    # echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' removed_Helixaugustus_perl.gff3" >> helixAugCommands.txt
+    echo -e "sed -i -E 's/([[:digit:]])-g/\1-gH/g' Helixer_augustus_perl.gff3" >> helixAugCommands.txt
     echo -e "mv complete_Helixaugustus.gff3 .." >> helixAugCommands.txt
     echo -e "mv removed_Helixaugustus.gff3 .." >> helixAugCommands.txt
     echo -e "mv Helixer_augustus.gff3 .." >> helixAugCommands.txt
+    echo -e "mv Helixer_augustus_perl.gff3 .." >> helixAugCommands.txt
     echo -e "cd .." >> helixAugCommands.txt
     echo -e "cat complete_Helixaugustus.gff3 >> completeBuscos.gff3" >> helixAugCommands.txt
-    echo -e "cat Helixer_augustus.gff3 >> gene_predictions.gff3" >> helixAugCommands.txt
+    echo -e "cat Helixer_augustus_perl.gff3 >> gene_predictions.gff3" >> helixAugCommands.txt
 
     echo -e "bash helixAugCommands.txt" >> filterCommands.txt
     
@@ -352,7 +366,7 @@ if [ -f "liftoff.gff3" ]; then
     echo -e "mv LiftoffBuscos.gff3 .." >> liftoffCommands.txt
     echo -e "mv LiftoffRemoved.gff3 .." >> liftoffCommands.txt
     echo -e "cd .." >> liftoffCommands.txt
-    ##echo -e "cat LiftoffRemoved.gff3 >> gene_predictions.gff3" >> liftoffCommands.txt
+    #echo -e "cat LiftoffRemoved.gff3 >> gene_predictions.gff3" >> liftoffCommands.txt
     echo -e "cat LiftoffBuscos.gff3 >> completeBuscos.gff3" >> liftoffCommands.txt
     echo -e "cat liftoff.gff3 >> gene_predictions.gff3" >> liftoffCommands.txt
     
@@ -484,63 +498,12 @@ bash ${baseDir}/filterDuplicateBuscos.sh -f Missing
 mv filteredCompleteBuscos.gff3 ../completeBuscos.gff3
 cd ..
 
-#run gfacs
-mkdir split
-cp genome.fasta split/genome.fa
-
-cd split/
-
-awk '/>/{n++}{print >"___"  n ".fasta" }' "genome.fa"
-
-for file in *.fasta; do
-    sed -i '1s/\s.*$//' $file
-done
-
-for file in *.fasta; do
-    cat $file >> formattedgenome.fa
-done
-
-cp formattedgenome.fa ..
-
-cd ..
-
-/opt/gFACs-master/gFACs.pl -f EVM_1.1.1_gff3 -p gFacs_Filtered --statistics --statistics-at-every-step --min-CDS-size 250 --unique-genes-only --fasta formattedgenome.fa --splice-table --allow-alternate-starts --nt-content --create-gtf --create-simple-gtf --create-gff3 --annotated-all-genes-only  --compatibility SnpEff EVM_1.1.1_gene_prediction EVM_1.1.1_alignment -O . EVMRemoved.gff3
-
-
 cat completeBuscos.gff3 > unsortedAnnotation.gff3
 
 echo "sorting lenient"
 
 cat unsortedAnnotation.gff3 >> FinalStructuralAnnotationLenientFilter.gff3
 cat EVMRemoved.gff3 >> FinalStructuralAnnotationLenientFilter.gff3
-
-cat unsortedAnnotation.gff3 >> FinalStructuralAnnotationStrictFilter.gff3
-cat gFacs_Filtered_EVM_1.1.1_gene_prediction_format.gff3 >> FinalStructuralAnnotationStrictFilter.gff3
-
-#echo -e "mkdir sortingLenient/" >> sortLenient.txt
-#echo -e "cp unsortedAnnotation.gff3 sortingLenient/" >> sortLenient.txt
-#echo -e "cp genome.fasta sortingLenient/genome.fa" >> sortLenient.txt
-#echo -e "cd sortingLenient/" >> sortLenient.txt
-#echo -e "cat ../EVMRemoved.gff3 >> unsortedAnnotation.gff3" >> sortLenient.txt
-#echo -e "bash ${baseDir}/sortAnnotation.sh -g genome.fa -a unsortedAnnotation.gff3" >> sortLenient.txt
-#echo -e "cp sorted.gff3 ../FinalStructuralAnnotationLenientFilter.gff3" >> sortLenient.txt
-#echo -e "cd .." >> sortLenient.txt
-
-#echo "sorting Strict"
-
-#echo -e "mkdir sortingStrict/" >> sortStrict.txt
-#echo -e "cp unsortedAnnotation.gff3 sortingStrict/" >> sortStrict.txt
-#echo -e "cp genome.fasta sortingStrict/genome.fa" >> sortStrict.txt
-#echo -e "cd sortingStrict/" >> sortStrict.txt
-#echo -e "cat ../gFacs_Filtered_EVM_1.1.1_gene_prediction_format.gff3 >> unsortedAnnotation.gff3" >> sortStrict.txt
-#echo -e "bash ${baseDir}/sortAnnotation.sh -g genome.fa -a unsortedAnnotation.gff3" >> sortStrict.txt
-#echo -e "cp sorted.gff3 ../FinalStructuralAnnotationStrictFilter.gff3" >> sortStrict.txt
-#echo -e "cd .." >> sortStrict.txt
-
-#echo -e "bash sortStrict.txt" >> sortCommands.txt
-#echo -e "bash sortLenient.txt" >> sortCommands.txt
-
-#parallel < sortCommands.txt > sorting.log
 
 cp FinalStructuralAnnotationStrictFilter.gff3 FinalStructuralAnnotationStrictFilterold.gff3
 cp FinalStructuralAnnotationLenientFilter.gff3 FinalStructuralAnnotationLenientFilterold.gff3
@@ -563,17 +526,6 @@ echo -e "agat_sp_statistics.pl --gff FinalStructuralAnnotationLenientFilter.gff3
 echo -e "cp * .." >> tidyLenient.txt
 echo -e "cd .." >> tidyLenient.txt
 
-echo -e "mkdir tidyStrict" >> tidyStrict.txt
-echo -e "mv FinalStructuralAnnotationStrictFilter.gff3 tidyStrict/" >> tidyStrict.txt
-echo -e "cd tidyStrict" >> tidyStrict.txt
-echo -e "cp ../genome.fasta ." >> tidyStrict.txt
-#echo -e "bash ${baseDir}/gff3togtf.sh -i FinalStructuralAnnotationStrictFilter.gff3" >> tidyStrict.txt
-echo -e "agat_sp_extract_sequences.pl --clean_final_stop --gff FinalStructuralAnnotationStrictFilter.gff3 -f genome.fasta -p -o proteinFinalStrict.fa" >> tidyStrict.txt
-echo -e "agat_sp_statistics.pl --gff FinalStructuralAnnotationStrictFilter.gff3 --output FinalStructuralAnnotationStrictFilter.gff3.stats" >> tidyStrict.txt
-echo -e "cp * .." >> tidyStrict.txt
-echo -e "cd .." >> tidyStrict.txt
-
-echo -e "bash tidyStrict.txt" >> tidyCommands.txt
 echo -e "bash tidyLenient.txt" >> tidyCommands.txt
 
 parallel < tidyCommands.txt > tidy.log
@@ -583,7 +535,5 @@ echo "running final busco stats"
 
 conda activate BUSCO
 busco -i proteinFinalLenient.fa -l ${lineage} -o buscooutLenient -m protein -c ${threads}
-busco -i proteinFinalStrict.fa -l ${lineage} -o buscooutStrict -m protein -c ${threads}
 mv buscooutLenient/*.txt .
-mv buscooutStrict/*.txt .
 conda deactivate

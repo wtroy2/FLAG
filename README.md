@@ -92,6 +92,15 @@ bash pull_docker_images.sh
 ```
 
 ### Setup for Singularity with Nextflow:
+#### Installing with nextflow:
+Everything needed can be installed with conda via
+```bash
+conda create -n flag nextflow python=3.9 pip apptainer -c bioconda -c conda-forge
+conda activate flag
+cp /etc/apptainer/apptainer.config $CONDA_PREFIX/etc/apptainer/
+```
+
+#### Conda is already globally installed:
 1. Step 1 is not always required but usually recommended as default singularity installs may be old or problematic depending on your singularity system settings. For this we recommend installing the latest version of apptainer with conda as this has been shown to work for various people.
 
 <p>First we create the conda env with the name 'flag', as of writing apptainer v1.3 is the latest.</p>
