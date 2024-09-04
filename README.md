@@ -76,14 +76,15 @@ normal nextflow.
 
 ### Setup for Docker:
 1. All docker images are currently available in the github repo, they can also be built if desired. Pull them from the github repo: bash pull_docker_images.sh 
-2. Make the eggnog database:
- <p>bash setup_eggnogDB.sh</p>
+2. Make the eggnog and flag databases:
+ <p>bash setup_eggnogDB.sh; bash make_flagdb.sh</p>
 3. Make sure your output directory exists and can be written to. If running the example run command you can run the makeDirectories.sh script to do this. 
 
 #### Summary of DOCKER Setup Commands:
 ```bash
 bash makeDirectories.sh
 bash setup_eggnogDB.sh
+bash make_flagdb.sh
 ```
 
 If running from docker pull the docker images:
@@ -112,10 +113,11 @@ cp /etc/apptainer/apptainer.config $CONDA_PREFIX/etc/apptainer/
 bash direct_pull_singularity.sh
 ```
 
-3. Make the eggnog database:
+3. Make the eggnog and flag databases:
 ```bash
 bash makeDirectories.sh
 bash setup_eggnogDB.sh
+bash make_flagdb.sh
 ```
 
 4. Make sure your output directory exists and can be written to. If running the example run command you can run the makeDirectories.sh script to do this.
@@ -136,6 +138,7 @@ cp /etc/apptainer/apptainer.config $CONDA_PREFIX/etc/apptainer/
 ```bash
 bash makeDirectories.sh
 bash setup_eggnogDB.sh
+bash make_flagdb.sh
 ```
 
 If running from docker pull the docker images:
@@ -149,7 +152,7 @@ mkdir tmp
 export SINGULARITY_TMPDIR="$(pwd)/tmp"
 ```
 
-### Setup for Singularity from Single Singularity Image - Experimental:
+### Setup for Singularity from Single Singularity Image - Experimental (not very supported and currently missing the flagdb):
 The entirety of FLAG with the eggnog database is in a single singularity image that can be built by the user. To simplify this building process a script can be run to build the flag singularity image and move it to the examples directory in the FLAG repo. This will also setup all necessary files and directories for the initial flag run:
 1. Step 1 is not always required but usually recommended as default singularity installs may be old or problematic depending on your singularity system settings. For this we recommend installing the latest version of apptainer with conda as this has been shown to work for various people.
 
@@ -225,7 +228,7 @@ Currently available Nextflow run parameters (and descriptions) include:
 --rnadatabaseid (This option is not currently fully supported in the open source version of flag however all code to support it is in the repo and just paths need to be modified. This is for running FLAG with external transcript databases)
 
 ## Example Docker Run commands
-Within the repo all example files from the paper for Erynnis tages are provided, except for the genome assembly which can be downloaded from https://ftp.ensembl.org/pub/rapid-release/species/Erynnis_tages/GCA_905147235.1/braker/genome/Erynnis_tages-GCA_905147235.1-softmasked.fa.gz. Note an Eggnog database must still be made if running nextflow with docker, for the large singularity container it is already built. Also MAKE SURE that your output directory exists before running and is able to be written to. If the output directory does not exist before running this can lead to errors.
+Within the repo all example files from the paper for Erynnis tages are provided, except for the genome assembly which can be downloaded from https://ftp.ensembl.org/pub/rapid-release/species/Erynnis_tages/GCA_905147235.1/braker/genome/Erynnis_tages-GCA_905147235.1-softmasked.fa.gz. Note the Eggnog and flag databases must still be made if running nextflow with docker, for the large singularity container it is already built. Also MAKE SURE that your output directory exists before running and is able to be written to. If the output directory does not exist before running this can lead to errors.
 
 ### Local Docker Run Examples:
 After making the EnTap database and uncompressing the example run files in the example folder one can annotate Eynnis tages with the following run command without Liftoff and WITH docker:
@@ -297,7 +300,7 @@ nextflow run main.nf -w workdir/ --output outputdir/ \
 ```
 
 ## Example Singularity with Nextflow Run commands
-Within the repo all example files from the paper for Erynnis tages are provided, except for the genome assembly which can be downloaded from https://ftp.ensembl.org/pub/rapid-release/species/Erynnis_tages/GCA_905147235.1/braker/genome/Erynnis_tages-GCA_905147235.1-softmasked.fa.gz. Note an Eggnog database must still be made if running nextflow with singularity, for the large singularity container it is already built. Also MAKE SURE that your output directory exists before running and is able to be written to. If the output directory does not exist before running this can lead to errors.
+Within the repo all example files from the paper for Erynnis tages are provided, except for the genome assembly which can be downloaded from https://ftp.ensembl.org/pub/rapid-release/species/Erynnis_tages/GCA_905147235.1/braker/genome/Erynnis_tages-GCA_905147235.1-softmasked.fa.gz. Note the Eggnog and flag databases must still be made if running nextflow with singularity, for the large singularity container it is already built. Also MAKE SURE that your output directory exists before running and is able to be written to. If the output directory does not exist before running this can lead to errors.
 
 NOTE: If you are having problems please start the run from within the FLAG directory and not from another directory outside of it as local file paths may matter.
 
@@ -656,6 +659,13 @@ For ease of use we simplify this process and confirm it is working as of August 
    <p>If you want it in a different directory you can specify the global or local location in your run command as such:</p>
    <p>--entapDB /home/wtroy/FLAG/entapDBs.tar.gz</p>
    <p>In this case my global path is /home/wtroy/FLAG/entapDBs.tar.gz</p>
+
+### FLAG Database
+This database provides additional support for filtering of the annotation and support for annotations.
+All that is needed is to run the make_flagdb.sh script.
+```bash 
+bash make_flagdb.sh
+```
 
 ## Workflow Diagram
 
