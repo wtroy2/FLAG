@@ -54,7 +54,7 @@ RUN apt-get -qq update && DEBIAN_FRONTEND="noninteractive" apt-get -qq -y instal
     gffread 
   
 #perl stuff
-RUN curl -L https://cpanmin.us | perl - App::cpanminus
+RUN curl -L https://cpanmin.us | perl - App::cpanminus@1.7047
 RUN cpanm URI::Escape module
 
 #install EVM
@@ -81,7 +81,7 @@ RUN cpanm install Carp
 RUN cpanm install Sort::Naturally File::Share File::ShareDir::Install Moose YAML LWP::Protocol::https
 RUN cpanm install Term::ProgressBar
 RUN cpanm install IPC::Run --force
-RUN cpanm install Bio::DB::EUtilities
+RUN cpanm install Bio::DB::EUtilities --force
 RUN cd /opt; git clone https://github.com/NBISweden/AGAT.git; cd AGAT; perl Makefile.PL; make; make install 
 
 #begin gFACs install

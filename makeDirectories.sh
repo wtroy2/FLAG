@@ -6,3 +6,4 @@ mkdir "$outDir"
 touch "${outDir}/emptyProteinPlaceHolder.txt"
 touch "${outDir}/emptyTranscriptPlaceHolder.txt"
 touch "${outDir}/emptyPlaceHolder.txt"
+mkdir tmp

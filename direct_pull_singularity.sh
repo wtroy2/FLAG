@@ -7,7 +7,7 @@ singularity pull flag_cbbasic.image docker://ghcr.io/formbio/flag_cbbasic:latest
 mv flag_cbbasic.image containers/cbbasic/
 
 echo "pulling flag_combinefilter_singularity"
-singularity pull flag_combinefilter.image docker://ghcr.io/formbio/flag_combinefilter_singularity:latest
+singularity pull flag_combinefilter.image docker://ghcr.io/wtroy2/flag_combinefilter_singularity:latest
 mv flag_combinefilter.image containers/combinefilter/
 
 echo "pulling flag_entap"

@@ -262,7 +262,6 @@ process CombineAndFilter {
     val size
   output:
     path("weights*"), emit: weights
-    path("FinalStructuralAnnotationStrictFilter.gff3"), emit: gff3Strict
     path("FinalStructuralAnnotationLenientFilter.gtf"), emit: gtfLenient
     path("FinalStructuralAnnotationLenientFilter.gff3"), emit: gff3Lenient
     path("FinalStructuralAnnotation*Filter.gff3"), emit: gff3s
@@ -400,24 +399,56 @@ process functionalAnnotation {
   touch final_annotations_lvl0.tsv
   """
 }
+// process combinestructwfunct {
+//   label 'evm'
+//   publishDir "$params.output/finalAnnots", mode: 'copy'
+//   publishDir "${params.output}", pattern: '*html', mode: 'copy'
+//   input:
+//     tuple path(functionalAnnotation),path(annotation),val(species),val(lineage),path(genome),val(program)
+//   output:
+//     path("final*.gtf")
+//     path("final*.gff3")
+//     path("final*.AGAT.stats")
+//     path("cdna_*.fa")
+//     path("proteins_*.fa")
+//     path("short_summary.*.buscoout.txt")
+//     path("results.html") optional true
+//     path("final*.gb") optional true
+//   script:
+//   """
+//   bash ${params.repoDir}/scripts/geneannotation/parseFunctional.sh -i ${functionalAnnotation} -a ${annotation} -s ${species} -l ${lineage} -g ${genome} -p ${program}
+//   """
+//   stub:
+//   """
+//   touch final_annotations_lvl0.tsv
+//   """
+// }
+
 process combinestructwfunct {
   label 'evm'
   publishDir "$params.output/finalAnnots", mode: 'copy'
   publishDir "${params.output}", pattern: '*html', mode: 'copy'
   input:
-    tuple path(functionalAnnotation),path(annotation),val(species),val(lineage),path(genome),val(program)
+    tuple path(functionalAnnotation),path(annotation),val(species),val(lineage),path(genome),val(program),path(flagdb),val(multi_percent_same_exon_match),val(multi_splign_coverage_min),val(multi_reference_splign_coverage_min),val(multi_pasa_coverage_min),val(multi_reference_pasa_coverage_min),val(multi_miniprot_coverage_min),val(multi_is_busco),val(multi_num_orthologs),val(single_percent_same_exon_match),val(single_splign_coverage_min),val(single_reference_splign_coverage_min),val(single_pasa_coverage_min),val(single_reference_pasa_coverage_min),val(single_miniprot_coverage_min),val(single_is_busco),val(single_num_orthologs),val(single_multi_ratio)
+    path files
   output:
     path("final*.gtf")
     path("final*.gff3")
+    path("semiFinalAnnotation.gff3") optional true
+    path("filtered_out_annotations.gff3")
+    path("FLAG_Gene_Support_Report.csv")
     path("final*.AGAT.stats")
     path("cdna_*.fa")
+    path("mrna_*.fa")
     path("proteins_*.fa")
     path("short_summary.*.buscoout.txt")
     path("results.html") optional true
     path("final*.gb") optional true
   script:
+  def miniIn = single_miniprot_coverage_min == 'None' ? "" : " -y ${single_miniprot_coverage_min}"
+  def ratioIn = single_multi_ratio == 'None' ? "" : " -z ${single_multi_ratio}"
   """
-  bash ${params.repoDir}/scripts/geneannotation/parseFunctional.sh -i ${functionalAnnotation} -a ${annotation} -s ${species} -l ${lineage} -g ${genome} -p ${program}
+  bash ${params.repoDir}/scripts/geneannotation/parseFunctional.sh -i ${functionalAnnotation} -a ${annotation} -s ${species} -l ${lineage} -g ${genome} -p ${program} -d ${flagdb} -b ${multi_percent_same_exon_match} -c ${multi_splign_coverage_min} -e ${multi_reference_splign_coverage_min} -f ${multi_pasa_coverage_min} -j ${multi_reference_pasa_coverage_min} -k ${multi_miniprot_coverage_min} -m ${multi_is_busco} -n ${multi_num_orthologs} -o ${single_percent_same_exon_match} -q ${single_splign_coverage_min} -r ${single_reference_splign_coverage_min} -t ${single_pasa_coverage_min} -u ${single_reference_pasa_coverage_min} -v ${single_is_busco} -w ${single_num_orthologs}${miniIn}${ratioIn}
   """
   stub:
   """

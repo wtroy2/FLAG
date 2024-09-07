@@ -105,7 +105,7 @@ if [[ "$predictionProgram" == "Augustus" ]]; then
     sort -h full_tableEdited3.tsv > full_tableEdited3Sorted.tsv
 
     awk '/# start gene/{n++}{print >"annotSplit"  n ".gtf" }' "$input"
-    rm $input
+#    rm $input
 
     count=0
     for FILE in ./annotSplit*.gtf; do
@@ -253,7 +253,7 @@ if [[ "$predictionProgram" == "Augustus" ]]; then
                 underOnehundredSingle=$(( $underOnehundredSingle + 1 ))
             fi
         fi
-        rm $file
+#        rm $file
     done
 
     total=$(( $underOnehundred + $underNinty + $underEighty + $underSeventy + $underSixty + $underFifty + $underForty + $underThirty + $underTwenty + $underTen ))
@@ -490,7 +490,7 @@ elif [[ "$predictionProgram" == "OtherAug" ]]; then
     sort -h full_tableEdited3.tsv > full_tableEdited3Sorted.tsv
 
     awk '/gene/{n++}{print >"annotSplit"  n ".gtf" }' "$input"
-    rm $input
+#    rm $input
 
     count=0
     for FILE in ./annotSplit*.gtf; do
@@ -538,7 +538,7 @@ else
     sort -h full_tableEdited3.tsv > full_tableEdited3Sorted.tsv
 
     awk '/gene/{n++}{print >"annotSplit"  n ".gtf" }' "$input"
-    rm $input
+#    rm $input
 
     count=0
     for FILE in ./annotSplit*.gtf; do
@@ -570,4 +570,3 @@ fi
 
 
 rm full_tableEdited*.tsv
-

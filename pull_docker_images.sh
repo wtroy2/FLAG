@@ -8,6 +8,6 @@ docker pull ghcr.io/formbio/flag_tetools:latest
 docker pull ghcr.io/formbio/flag_augustus:latest
 docker pull ghcr.io/formbio/flag_liftoff:latest
 docker pull ghcr.io/formbio/flag_trinity:latest
-docker pull ghcr.io/formbio/flag_combinefilter:latest
+docker pull ghcr.io/wtroy2/flag_combinefilter:latest
 docker pull ghcr.io/formbio/flag_ncbiclibraries:latest
 docker pull ghcr.io/formbio/flag_ncbitools:latest
