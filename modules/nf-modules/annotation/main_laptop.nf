@@ -153,6 +153,7 @@ process pasa {
   script:
   """
   bash ${params.repoDir}/scripts/geneannotation/pasa.sh -g ${genome} -r ${transcript} -t 15
+  rm /tmp/sample_mydb_pasa.sqlite
   """
   stub:
   """
